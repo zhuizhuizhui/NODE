@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Net Disk</title>	
+	<link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
+	<style type="text/css">
+		.outSide{
+			margin-top: 20px;
+		}			
+	</style>
+</head>
+<!-- 获取文件名 添加点击事件-->
+<body>
+	<!-- 上传界面 -->
+	<div class="container d-none okNode">
+		<h3 class="name"></h3>		
+		 <form id="upForm" enctype="multipart/form-data">
+		 <div class="input-group mb-3">
+ 			  <div class="custom-file">
+ 			    <input type="file" class="custom-file-input" id="chooseFile">
+ 			    <label class="custom-file-label" for="chooseFile" aria-describedby="upFile" id="filename">Choose file</label>
+ 			  </div>
+ 			  <div class="input-group-append">
+ 			    <span class="input-group-text btn" id="upFile">Upload</span>
+ 			  </div>
+		 </div> 
+		 </form>
+
+		<table class="table table-hover">
+		  <thead>
+		    <tr>
+					<th scope="col">序号</th>
+					<th scope="col">用户名</th>
+		      <th scope="col">文件名</th>
+		      <th scope="col">文件大小/kb</th>
+		      <th scope="col">上传时间</th>
+					<th scope="col">下载</th>
+					<th scope="col">下载次数</th>
+		      <th scope="col">是否删除</th>
+		    </tr>
+		  </thead>
+		  <tbody>		    
+		  </tbody>
+		</table>
+	</div>
+	<!-- 登录界面 -->
+	<div class="container outSide">		
+		<div class="card text-center">
+		  <div class="card-header">
+		    CUSTOM
+		  </div>
+		  <div class="card-body">
+		    <h5 class="card-title">简易小网盘</h5>
+		    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+		    <input type="button" class="btn btn-primary rAl" value="登录/注册" data-toggle='modal' data-target='#exampleModal'>
+					<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+					  <div class="modal-dialog" role="document">
+					    <div class="modal-content">
+					      <div class="modal-header">
+					        <h5 class="modal-title" id="exampleModalLabel">登录/注册</h5>
+					        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					          <span aria-hidden="true">&times;</span>
+					        </button>
+					      </div>
+					      <div class="modal-body">
+					        <form class="myForm">	  
+								  <div class="form-group row">
+								    <label for="username" class="col-sm-3 col-form-label col-form-label-lg">用户名:</label>
+								    <div class="col-sm-9">
+								      <input type="text" class="form-control form-control-lg" id="username" >
+								    </div>
+								  </div>
+								  <div class="form-group row">
+								    <label for="password" class="col-sm-3 col-form-label col-form-label-lg">密&nbsp;&nbsp;&nbsp;&nbsp;码:</label>
+								    <div class="col-sm-9">
+								      <input type="password" class="form-control form-control-lg" id="password" />
+								    </div>
+								  </div>
+								  <div class="form-group row">
+								  	<div class="col-sm-12">
+								   	<input type="button" class="float-left btn btn-primary col-sm-3" value="登录" id="login"/>
+								   	<input type="button" class="float-right btn btn-info col-sm-3" value="注册" id="reg"/>
+								   	</div>
+								  </div>
+							</form>
+					      </div>
+					      <div class="modal-footer">
+					        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancle</button>
+					      </div>
+					    </div>
+					  </div>
+					</div>
+		  </div>
+		  <div class="card-footer text-muted">
+		   2018-10-9
+		  </div>
+	   </div>		
+	</div>
+
+<script src="./js/jquery.min.js"></script>	
+<script src="./js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	;(function(){	
+		let index=0,//表格索引
+				tbody=$('tbody');
+		//注册	
+		$('#reg').on('click',function(){
+			$.ajax({
+				url:'/login/reg',
+				type:'post',
+				data:{
+					'username':$('#username').val(),
+					'password':$('#password').val()
+				},
+				success:function(data){
+					if(data.state==1){
+						alert(data.msg+'\n你可以尝试登录或者再次注册.')
+					}
+					if(data.state==2){						
+						let name=$('#username').val();
+							$('.myForm')[0].reset();//重置表单
+							$('#reg').addClass('disabled');//禁用							
+					}
+				}
+			})
+		})
+		//登录
+		$('#login').on('click',function(){
+			$.ajax({
+				'url':'/login',
+				type:'post',
+				data:{
+					'username':$('#username').val(),
+					'password':$('#password').val()
+				},
+				success:function(data){					
+					if(data.state==3||data.state==4){//用户不存在,密码错误						
+						alert(data.msg)						
+						$('.form-control').addClass('is-invalid');//无效
+					}
+					if(data.state==5){//ok
+						let name=$('#username').val();
+						alert(data.msg);
+						$('#exampleModal').modal('toggle');
+						$('.outSide').addClass('d-none');
+						$('.okNode')
+							.removeClass('d-none');
+						$('.name')
+							.html(`<p>欢迎回来,<strong>${name}</strong>!</p>`);
+						if(data.files){
+							showFile(data.files);
+						}
+					}
+				}
+			})
+		})
+		//选择文件
+		let fileList=null;
+		$('#chooseFile').on('change',function(){	
+					fileList=null;//清空数组
+					fileList=this.files;				    			
+			$('#filename').html(fileList[0].name);
+		})
+		//上传
+		$('#upFile').on('click',function(){	
+			if(!fileList.length)return;
+			let formData=new FormData(),
+					time=new Date().toLocaleString();
+				formData.append('files',fileList[0]);
+				formData.append('username',$('.name strong').html());	
+				formData.append('time',time);
+					$.ajax({
+						url:'/File/up',
+						type:'post',
+						processData:false,
+						cache:false,
+						contentType:false,
+						data:formData,
+						success:function(data){							
+							insertTab(data.files);
+						}
+					})
+		})
+
+		//删除
+		tbody.on({
+			'click':function(){			
+				let _this=this;
+				$.ajax({
+					url:'File/remove',
+					type:'get',
+					data:{//文件名 用户名
+						filename:$(_this).attr('filename'),
+						username:$(_this).attr('username')
+					},
+					success:function(data){						
+						if(data.state==9){
+							_this.parentNode.parentNode.remove();//删除网页数据
+						}						
+					}
+				})
+			}
+		},'input');
+
+		//下载
+		tbody.on({
+			'click':function(){				
+				let _this=this;
+				$.ajax({
+					url:'/File/down',
+					type:'get',
+					data:{//文件名 用户名
+						filename:$(_this).attr('filename'),
+						username:$(_this).attr('username')
+					},
+					success:function(data){
+						if(data.state===8){
+							let count=$(_this).parent().next();
+								num=Number(count.html());								
+								count.html(++num)							
+						}
+					}
+				})
+			}
+		},'.btn-down');
+
+		function showFile(data){	
+			tbody.html('');//clear
+			let len=data.length;		
+			for(let i=0;i<len;i++){
+				let cell=`<tr>
+							<td>${data[i].ID}</td>
+							<td>${data[i].userName}</td>
+							<td>${data[i].fileName}</td>									
+							<td>${data[i].size}</td>
+							<td>${data[i].time}</td>
+							<td>
+						<a class='btn btn-info btn-down' href='/uploads/${data[i].fileName}' download='${data[i].fileName}' filename='${data[i].fileName}' username='${data[i].userName}' role='button'>下载</a>
+						</td>
+							<td>${data[i].downLoad}</td>
+							<td>
+								<input type='button' class='btn btn-danger' value='删除' filename='${data[i].fileName}' username='${data[i].userName}'/>
+							</td>
+						</tr>`
+					tbody.append(cell);					
+			}
+		}
+
+		function insertTab(data){		
+			let cell=`<tr>
+							<td>${data[6]}</td>
+							<td>${data[0]}</td>
+							<td>${data[1]}</td>
+							<td>${data[4].toFixed(0)}</td>
+							<td>${data[2]}</td>
+							<td>
+						<a class='btn btn-info btn-down' href='/uploads/${data[1]}' download='${data[1]}' role='button' filename='${data[1]}' username='${data[0]}'>下载</a>
+						</td>
+							<td>${data[5]}</td>
+							<td>
+								<input type='button' class='btn btn-danger' value='删除' filename='${data[1]}' username='${data[0]}'/>
+							</td>
+					</tr>`
+					tbody.append(cell);					
+		}						
+		
+	})()	
+</script>
+</body>
+</html>
