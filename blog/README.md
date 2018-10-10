@@ -2,7 +2,8 @@
 # nodejs+mongoose+express+ejs
 
 实现功能
-	基本：
+
+	基本	
 		注册和登陆
 		页面通知
 		注册响应
@@ -33,5 +34,6 @@
 
 
 #注:参考资料	http://www.ybao.org/book/myblog/5370.html
+
 有待优化和补充~
 
