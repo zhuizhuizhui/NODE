@@ -8,3 +8,5 @@
   *
   *
  */
+ const sdk=require('baidu-aip-sdk');
+ 
