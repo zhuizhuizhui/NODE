@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>深入浅出Nodejs笔记</title>
+	<style type="text/css">
+		ul{
+			padding-left: 0px;
+		}
+		li{
+			list-style-type: none;
+		}	
+		p{
+			word-wrap: break-word;
+		}	
+		:target{
+			color: red;
+		}
+	</style>
+</head>
+<body>
+	<ul class="nav">
+		<li><a href="#a0">发布包</a>
+		<li><a href="#a1">特点</li>
+		<li><a href="#a2">模块机制</li>
+		<li><a href="#a3">定时器</a></li>
+		<li><a href="#a4">缺点</a></li>
+		<li><a href="#a5">Promise</a></li>
+		<li><a href="#a6">服务器经典模式</a></li>
+		<li><a href="#a7">高阶函数</a></li>
+		<li><a href="#a8">中间件</a></li>
+		<li><a href="#a9">async</a></li>
+		<li><a href="href#a10">V8垃圾回收</a></li>
+	</ul>	
+	<main>
+		<hr>
+		<section id="a0">
+			<code>				
+			npm adduser
+			<br>
+			Username:
+			<br>
+			Email:
+			<br>
+			npm publish
+			<br>
+			//.......			
+			</code>
+		</section>
+		<hr>
+		<section id="a1">
+			异步I/O，事件驱动，单线程，跨平台<br>
+			<strong>优势:</strong>基于事件驱动的非阻塞I/O模型
+		</section>	
+		<hr>
+		<section id="a2">			
+			<strong>CommonJS:</strong>模块引用(require)，模块定义(exports)和模块标识
+			<br>
+			<strong>模块实现:</strong>路径分析，文件定位，编译执行		
+			<strong>主要区别:</strong>定义模块何以如部分，AMD需要在声明模块的时候指定所有的依赖，通过形参传递依赖到模块内容中;CMD则是require,exports,module通过形参传递给模块，在需要时自行require引入
+			<br>
+			<code>
+				;(function(name,definition){<br>
+				var hasDefine=typeof define==='function',//AMD<br>
+					hasExports=typeof module!=='undefined'&&module.exports;//CMD<br>
+					if(hasDefind)<br>
+						define(definition)<br>
+					else if(hasExports)<br>
+						module.exports=definition()<br>
+					else<br>
+						this[name]=definition()<br>
+				})('hello',function(){<br>
+				var hello=function(){}<br>
+				return hello;<br>
+			})<br>
+			</code>
+		</section>
+		<section id="a3">
+			<code>
+				//process.nextTick>setTmmediate>setTimeout<br>
+				setImmediate(()=>{<br>
+					console.log(1+'setImmediate')<br>
+					setTimeout(()=>{<br>
+						console.log(2+'setTimeout')<br>
+					},0)<br>
+				})<br>
+
+				setImmediate(()=>{<br>
+					console.log(3+'setImmediate')<br>
+				})<br>
+				process.nextTick(()=>{<br>
+					console.log(4+'process')<br>
+				})<br>
+				process.nextTick(()=>{<br>
+					console.log(5+'process')<br>
+					setTimeout(()=>{<br>
+						console.log(6+'timeout')<br>
+					},0)<br>
+					setImmediate(()=>{<br>
+						console.log(7+'setImmediate')<br>
+						})<br>
+					})//4  5  1 3 7 6 2<br>			
+				})
+			</code>
+		</section>
+		<hr>
+		<section id="a4">
+			<h3>异常处理，嵌套过深，阻塞代码，多线程编程，异步转同步</h3>
+			主要解决方案:事件发布/订阅模式，Promise/Deferred模式，流程控制库<br>			
+		</section>
+		<hr>
+		<section id="a5">			
+			<p>
+			其操作只会处在3种状态的一种:未完成态，完成态，失败态；且转台只会出现在从未完成态向完成态或失败态转化，不能逆反，完成态和失败态不能互相转化；状态一旦转化，将不能改变
+			</p>
+		</section>
+		<hr>
+		<section id="a6">
+			<p>同步式:对于同步式服务器一次只能处理一个请求且其余的处于等待状态
+			</p>
+			<p>每进程:对于请求启动一个进程，这样可以处理多个请求，但他不具备扩展性，因为系统资源只有那么多</p>
+			<p>每线程:为每个请求启动一个线程来处理。尽管线程不进程要轻量，但是由于每个线程都占用一定内存，但<b>大并发</b>请求到来时，内存很快用光，导致服务器进程缓慢。唔，每线程的扩展性比每进程的扩展性较好。</p>
+		</section>
+		<section id="a7">
+			<p>
+				<b>高阶函数</b>则是可以把函数作为参数或者将函数作为返回值的函数(Array的sort方法传入参数为函数)
+			</p>
+			<p>
+				<b>偏函数用法</b>则是创建一个调用另外一个部分----参数或变量已经预置的函数------的函数的用法(例子如下)
+			</p>
+			<code>
+				var toString=Object.prototype.toString;<br>
+				var isType=(type)=>{<br>
+					reutrn (obj)=>{<br>
+						return toString.call(obj)==`[object ${type}]`
+					}<br>
+				}<br>
+				var isString=isType('String'),<br>
+				isString('abc');<br>
+			</code>
+		</section>
+		<hr>
+		<section id="a8">
+			<a href="./Promise/test.js" target="_blan">中间件</a>
+		</section>		
+		<hr>
+		<section id="a9">
+			<a href="./Promise/async.js" target="_blan">async</a>
+		</section>		
+		<hr>
+		<section id="a10">
+			<p>V8垃圾回收策略:<b>基于分代式垃圾回收机制</b></p>
+			<p>内存分代:主要将内存分为新生代和老生代。新生代中的对象为存活时间较短的对象;老生代则为时间较长的或常驻内存的对象</p>
+			<p>V8整体大小=新生代+老生代</p>
+			<p><code>--max-old-space-size</code>设置老生代空间最大值;<code>--max-new-space-size</code>则是新生代。
+				V8不能自动扩充，则须在启动前设置,超过极限值也会出错。(查看node内存-->打开node终端：node  process.memoryUsage())
+			</p>
+
+		</section>
+	</main>
+	<footer>
+		<em>emitter.setMaxListeners(n)可以将事件监听器个数去掉(限制为10)</em>
+		<em>雪崩:高访问量，大并发量的情况下缓存失败的情景，此时大量的请求同时涌入数据库，数据库无法承受如此大的查询请求，进而影响网站整体响应速度</em>
+	</footer>
+</body>
+</html>

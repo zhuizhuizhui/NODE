@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>	
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<style type="text/css">
+		body{			
+			display: grid;
+			min-width: 600px;
+			grid-template-columns: 100%;
+			grid-template-rows: 50px 300px 50px;
+			text-align: center;	
+			border:2px solid lightskyblue;	
+			overflow: hidden;			
+		}
+		ul{
+			padding-left: 0;
+		}
+		button,header{
+			padding: 5px;
+			color: white;			
+			border:none;
+		}
+		header{			
+			line-height: 45px;					
+			background-color: lightblue;
+		}
+
+		main{		
+			position: relative;
+			border:2px solid white;			
+			border-radius:5px;
+			background-color: black;
+		}
+		main .head{
+			position: fixed;			
+			margin: 40px 25%;	
+			width: 45%;
+			height: 250px;						
+			border:1px solid white;
+		}
+		main .headphoto{
+			width: 100%;
+			height: 80%;	
+		}
+		main canvas{
+			position: absolute;
+			top:0;
+			left: 0;
+		}
+		main img{			
+		    position: absolute;
+		    width: 100px;
+		    height: 100px;
+		    top: 0;
+		    right: 0;
+		    border-left: 1px solid white;
+		    border-bottom: 1px solid white;
+		}
+		main .tip{						
+			color: #fff;
+		}
+		footer ul{
+			display: flex;
+			justify-content: space-around;
+		}
+		footer ul li{
+			list-style-type: none;
+		}
+		footer ul li button{
+			background-color: lightskyblue;
+			cursor: pointer;
+		}		
+	</style>
+</head>
+<body>
+	<header>
+		人脸识别
+	</header>
+	<main>
+		<i class="head">你好</i>
+		<video class="headphoto"></video>
+		<canvas id="canvas"></canvas>
+		<p class="tip">
+			请对准摄像头!
+		</p>
+	</main>
+	<footer>
+		<ul>
+			<li><button id="open">准备</button></li>
+			<li><button id="confirm">确认</button></li>
+			<li><button id="cancel">取消</button></li>
+		</ul>
+	</footer>
+	<script type="text/javascript">
+		/*调用本地摄像头
+		 *	navigator.getMedia
+		 *解析视频流截取图片为url上传对比
+		 *		canvas.toDataURL   返回结果为base64格式数据
+		*/
+		let head=document.querySelector('.head'),
+			ready=document.getElementById('open'),
+			confirm=document.getElementById('confirm'),
+			cancel=document.getElementById('cancel'),
+			video=document.querySelector('video'),
+			video_url=window.URL||window.webkitURL,
+
+			img=document.querySelector('img'),
+			ctx=canvas.getContext('2d');
+			navigator.getMedia=navigator.getUserMedia||navigator.webkitGetUserMedia||navigator.mozGetUserMedia||navigator.msGetUserMedia;
+
+			ready.onclick=initMedia;
+			confirm.onclick=getImg;
+			cancel.onclick=clear;
+
+			function initMedia(){
+				console.log(123)
+				if(navigator.getMedia){
+					navigator.getMedia({
+						video:true,
+						audio:false
+					},success,err)
+				}else{
+					alert('你的浏览器不支持!')
+				}
+			}
+
+			function success(stream){
+				initVedio(stream);
+				video.play();
+			}
+			function err(err){
+				console.log('error:'+err)
+			}
+
+			function initVedio(buf){
+				if(video.mozSrcObject!==undefined)
+					video.mozSrcObject=buf;
+				else
+					video.src=window.URL?window.URL.createObjectURL(buf):window.webkitURL.createObjectURL(buf);
+			}
+
+		   function getImg(){		   	
+		   	 let w=video.offsetWidth,
+		   	 	 h=video.offsetHeight,
+		   	 	 img=new Image();
+		   	 ctx.drawImage(video,head.offsetTop,head.offsetLeft,head.offsetWidth,head.offsetHeight);
+		   	 let data=canvas.toDataURL('img/png');
+		   	 postInfo(data);
+		   }
+		   function getCanvasSize(){
+		   	
+		   }
+		   function clear(){
+		   	ctx.clearRect(0,0,canvas.width,canvas.height);		   	
+		   }
+		   //app.js
+		   function postInfo(buf){
+		   	let url='http://localhost:3000/updata';
+		   		fetch(url,{
+		   			method:'POST',	
+		   			body:buf
+		   		}).then(res=>{
+		   			return res.text()
+		   		}).then(data=>{
+		   			console.log(data);
+		   		})		   		
+		   }
+
+	</script>
+</body>
+</html>
